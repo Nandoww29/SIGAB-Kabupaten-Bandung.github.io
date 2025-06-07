@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGAB Kabupaten Bandung</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
+  
+  <link rel="stylesheet" href="https://balladaniel.github.io/leaflet-dataclassification/leaflet-dataclassification.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+
+  <script src="https://balladaniel.github.io/leaflet-dataclassification/leaflet-dataclassification.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+</head>
+<body>
+  <audio id="bg-audio" autoplay loop hidden>
+    <source src="asset/bedas.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <style>
+    #navbar {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      transition: top 0.3s ease;
+      z-index: 1000;
+    }
+  </style>
+  <header id="navbar">
+    <div class="container">
+      <div class="navbar-left">
+        <div class="logo" style="display: flex; align-items: center; gap: 5px;">
+          <img src="asset/logo.png" alt="Logo" style="height: auto; width: 100px;">
+          <div>
+            <h1 style="margin: 0; font-size: 4em; color: rgb(255, 255, 255);">SIGAB</h1>
+            <p style="margin: 0; font-style: italic; font-size: 0.9em;">Siaga Banjir Kabupaten Bandung</p>
+          </div>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <nav>
+          <ul>
+            <li><a href="#hero-section">Beranda</a></li>
+            <li><a href="#map-section">Peta</a></li>
+            <li><a href="#video-section">Tentang</a></li>
+            <li><a href="#author-section">Profil</a></li>
+            <button id="dark-toggle">🌙</button>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    
+  </header>
+  <script>
+    document.getElementById('dark-toggle').addEventListener('click', function () {
+      document.body.classList.toggle('dark-mode');
+      
+      // Ganti ikon tombol 🌙 ↔ ☀️
+      this.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    });
+  </script>
+  
+  <section class="content-section" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+    <section id="hero-section">
+      <div class="hero-slide active" style="background-image: url('asset/banjir.jpg');"></div>
+      <div class="hero-slide" style="background-image: url('https://cdn0-production-images-kly.akamaized.net/cltPZ1sAaamapaFsPxyI3XXu3R8=/1200x1200/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4713979/original/076792700_1705045264-20240112-Banjir_Bandung-AFP_1.jpg');"></div>
+      <div class="hero-slide" style="background-image: url('https://citarumharum.jabarprov.go.id/eusina/uploads/2023/03/jumatc2-transformed.jpeg');"></div>
+    <div class="hero-content" data-aos="fade-up">
+      <h1>Sampurasun wargi BEDAS!</h1>
+      <p>Sebagai upaya mitigasi bencana, yuk pahami tingkat risiko banjir di Kabupaten Bandung!
+      </p>
+    </div>
+  </section>
+
+  <section id="map-section" style="padding-left:50px ; padding-right: 50px; padding-top: 10px;">
+    <h2 data-aos="fade-right">Peta Interaktif Kabupaten Bandung</h2>
+  
+    <div class="tab-container" style="text-align:center; margin: 20px 0;">
+      <button id="btn-risiko" style="margin-bottom: 5px;" onclick="showMap('risiko')">Peta Risiko Banjir</button>
+      <button id="btn-parameter" style="margin-bottom: 5px;" onclick="showMap('parameter')">Peta Parameter Risiko Banjir</button>
+    </div>
+  
+    <!-- Loading Spinner -->
+    <div id="map-loading" style="display: none; text-align: center; margin-bottom: 10px;">
+      <div class="spinner" style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(0,0,0,0.2); border-top-color: #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <p>Memuat peta...</p>
+    </div>
+  
+    <div id="map-risiko" style="width:100%; height:600px; margin-bottom: 5px;">
+      <iframe src="peta_risiko/index.html" width="100%" height="100%" style="border:none;" onload="hideLoading()"></iframe>
+    </div>
+  
+    <div id="map-parameter" style="width:100%; height:600px; display:none; margin-bottom: 5px;">
+      <iframe src="peta_parameter/index.html" width="100%" height="100%" style="border:none;" onload="hideLoading()"></iframe>
+    </div>
+  
+    <script>
+     let parameterLoaded = false;
+let risikoLoaded = false;
+
+function showMap(type) {
+  const risiko = document.getElementById('map-risiko');
+  const parameter = document.getElementById('map-parameter');
+  const btnRisiko = document.getElementById('btn-risiko');
+  const btnParameter = document.getElementById('btn-parameter');
+  const loading = document.getElementById('map-loading');
+
+  loading.style.display = 'block';
+
+  if (type === 'risiko') {
+    risiko.style.display = 'block';
+    parameter.style.display = 'none';
+    btnRisiko.classList.add('active');
+    btnParameter.classList.remove('active');
+
+    if (!risikoLoaded) {
+      const iframeRisiko = risiko.querySelector('iframe');
+      iframeRisiko.src = 'peta_risiko/index.html';
+      risikoLoaded = true;
+    } else {
+      loading.style.display = 'none';
+    }
+
+  } else {
+    risiko.style.display = 'none';
+    parameter.style.display = 'block';
+    btnRisiko.classList.remove('active');
+    btnParameter.classList.add('active');
+
+    if (!parameterLoaded) {
+      const iframeParameter = parameter.querySelector('iframe');
+      iframeParameter.src = 'peta_parameter/index.html';
+      parameterLoaded = true;
+    } else {
+      loading.style.display = 'none';
+    }
+  }
+}
+
+function hideLoading() {
+  const loading = document.getElementById('map-loading');
+  loading.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  showMap('risiko');
+});
+
+    </script>
+  
+    <style>
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      /* Tambahkan CSS di sini */
+  #btn-risiko,
+  #btn-parameter {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  #btn-risiko {
+    background-color: #4CAF50; /* Hijau */
+  }
+
+  #btn-parameter {
+    background-color: #007BFF; /* Biru */
+  }
+
+  #btn-risiko.active {
+    background-color: #388E3C;
+  }
+
+  #btn-parameter.active {
+    background-color: #0056b3;
+  }
+
+  #btn-risiko:hover {
+    background-color: #45a049;
+  }
+
+  #btn-parameter:hover {
+    background-color: #0069d9;
+  }
+    </style>
+  </section>
+  
+  <section id="video-section" style="padding: 2rem; background-color: #f9f9f9;">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h2 style="text-align: center; margin-bottom: 1rem;">Video Edukasi Banjir</h2>
+      <div style="display: flex; justify-content: center; align-items: center;">
+        <iframe 
+          width="720" 
+          height="405" 
+          src="https://www.youtube.com/embed/Yc-uEYJU0hY"
+          title="YouTube video player" 
+          frameborder="0" 
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      </div>
+  </section>
+
+  <section id="data-section">
+    <h2 data-aos="fade-up">Mengenal Risiko Banjir Kabupaten Bandung: Penyebab, Dampak, dan Upaya Mitigasi</h2>
+    <div class="data-wrapper" style="display: flex; flex-direction: column; gap: 20px;" data-aos="fade-up">
+      <p>
+        <strong>Peta Risiko Banjir Kabupaten Bandung</strong> disusun dengan memadukan tiga parameter utama: <strong>kerawanan</strong>, <strong>eksposur</strong>, dan <strong>kerentanan</strong>. Pendekatan ini memungkinkan identifikasi wilayah dengan potensi banjir berdasarkan kondisi lingkungan fisik, tekanan aktivitas manusia, serta kemampuan wilayah dalam menghadapi bencana.
+      </p>
+      <p>
+        Peta ini mengklasifikasikan tingkat risiko banjir ke dalam lima kategori: <strong>Sangat Rendah</strong>, <strong>Rendah</strong>, <strong>Sedang</strong>, <strong>Tinggi</strong>, dan <strong>Sangat Tinggi</strong>.
+      </p>
+      <p>
+        Wilayah dengan <strong>risiko sangat tinggi</strong> mencakup kecamatan <strong>Dayeuhkolot, Bojongsoang, Majalaya, Ciparay</strong>, dan <strong>Rancaekek</strong>. Kawasan ini berada di dataran rendah DAS Citarum dan memiliki faktor penyebab banjir seperti kepadatan penduduk tinggi, pembangunan tak terencana, drainase buruk, serta aliran air besar dari wilayah hulu.
+      </p>
+      <p>
+        Selain itu, <strong>faktor manusiawi</strong> juga memperparah risiko banjir, seperti: 
+        alih fungsi lahan resapan, pembuangan sampah ke sungai, minimnya ruang terbuka hijau, dan penggundulan hutan.
+      </p>
+      <p>
+        Wilayah seperti <strong>Pangalengan, Rancabali, Pasirjambu</strong>, dan <strong>Kertasari</strong> memiliki <strong>risiko rendah hingga sangat rendah</strong> berkat kondisi topografi tinggi, vegetasi yang masih alami, serta urbanisasi yang rendah.
+      </p>
+      <h3>Mitigasi dan Imbauan Kewaspadaan</h3>
+      <p>
+        Situs ini dibuat sebagai bagian dari <strong>upaya mitigasi bencana banjir</strong>. Kami mengimbau masyarakat untuk:
+      </p>
+      <ul>
+        <li>Selalu <strong>waspada</strong>, terutama di wilayah berisiko tinggi.</li>
+        <li>Tidak membuang sampah ke sungai atau saluran air.</li>
+        <li>Menjaga ruang terbuka hijau dan vegetasi alami.</li>
+        <li>Berpartisipasi dalam upaya kesiapsiagaan bencana.</li>
+      </ul>
+      <p>
+        Peta ini diharapkan menjadi <strong>alat edukasi, perencanaan, dan pengambilan keputusan</strong> yang berbasis data dalam menghadapi ancaman banjir secara bijak.
+      </p>
+    </div>
+  </section>
+
+  <section id="author-section">
+    <h2 data-aos="fade-up">Tentang Pembuat</h2>
+    <img src="asset/author-picture.jpg" alt="Author" class="profile-picture" data-aos="zoom-in">
+    <h3>Nando Rizkifa Ramadhan</h3>
+    <p>Seorang mahasiswa teknik dengan keahlian mendalam sebagai teknisi ahli di bidang Sistem Informasi Geografis (GIS), tidak hanya menguasai pengumpulan, analisis, dan visualisasi data spasial, tetapi juga memiliki pemahaman praktis dalam mengimplementasikan GIS untuk solusi konkret di berbagai proyek teknis, didukung oleh latar belakang teknik yang solid dan kemampuannya dalam mengoperasikan berbagai perangkat lunak GIS terkini, menjadikannya aset berharga untuk setiap tim yang membutuhkan keahlian geospasial yang handal dan inovatif.</p>
+  </section>
+
+  <footer id="footer">
+    <div class="footer-content">
+      <h3>Hubungi Saya</h3>
+      <div class="contact-bubble">
+        <a href="mailto:nandoww@upi.edu" target="_blank" class="icon email">
+          <i class="fas fa-envelope"></i>
+        </a>
+        <a href="https://wa.me/6281210656881" target="_blank" class="icon phone">
+          <i class="fas fa-phone"></i>
+        </a>
+      </div>
+      <p style="margin-top: 10px; font-size: 0.8em;">
+        © 2025 SIGAB Kabupaten Bandung. Data disediakan untuk edukasi dan perencanaan mitigasi. Hak cipta dilindungi.
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+  <script src="script.js"></script>
+  <!-- Scroll to Top Button -->
+<button id="scrollTopBtn" title="Kembali ke atas">↑</button>
+
+<script>
+  // Tampilkan tombol ketika scroll lebih dari 300px
+  window.onscroll = function () {
+    const btn = document.getElementById("scrollTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+      btn.style.display = "block";
+    } else {
+      btn.style.display = "none";
+    }
+  };
+
+  // Scroll ke atas saat diklik
+  document.getElementById("scrollTopBtn").addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+<audio id="welcomeAudio" src="asset/bedas.mp3"></audio>
+<script>
+  const audio = document.getElementById('welcomeAudio');
+  let audioPlayed = false;
+
+  function playAudioOnce() {
+    if (audioPlayed) return;
+    audio.play().then(() => {
+      audioPlayed = true;
+      document.removeEventListener('mousemove', playAudioOnce);
+      document.removeEventListener('touchstart', playAudioOnce);
+      document.removeEventListener('scroll', playAudioOnce);
+    }).catch(e => {
+      console.log("Audio gagal diputar:", e);
+    });
+  }
+
+  document.addEventListener('mousemove', playAudioOnce);
+  document.addEventListener('touchstart', playAudioOnce);
+  document.addEventListener('scroll', playAudioOnce);
+</script>
+
+</body>
+</html>
+
+</body>
+</html>
